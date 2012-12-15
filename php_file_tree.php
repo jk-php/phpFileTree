@@ -3,12 +3,16 @@
 	
 	== PHP FILE TREE ==
 	
-		Let's call it...oh, say...version 1?
+		Version 1.1-john-DEV
 	
 	== AUTHOR ==
 	
 		Cory S.N. LaViska
 		http://abeautifulsite.net/
+	
+	== CONTRIBUTORS ==
+	
+		John Ko
 		
 	== DOCUMENTATION ==
 	
@@ -20,7 +24,7 @@
 
 @define( 'PHP_FILE_TREE_CLASS',  'Php_File_Tree' );
 
-function PhpFileTree($directory, $return_link, $extensions = array()) {
+function PhpFileTree($directory, $return_link, $extensions = array(), $version = "") {
 #
 # Initialize the parser and return the result of its transform method.
 #
@@ -32,7 +36,7 @@ function PhpFileTree($directory, $return_link, $extensions = array()) {
 	}
 
 	# Transform text using parser.
-	return $parser->xhtml($directory, $return_link, $extensions);
+	return $parser->xhtml($directory, $return_link, $extensions, $version);
 }
 
 class Php_File_Tree {
@@ -40,15 +44,15 @@ class Php_File_Tree {
 function Php_File_Tree() {
 }
 
-function xhtml($directory, $return_link, $extensions = array()) {
+function xhtml($directory, $return_link, $extensions = array(), $version = "") {
 	// Generates a valid XHTML list of all directories, sub-directories, and files in $directory
 	// Remove trailing slash
 	if( substr($directory, -1) == "/" ) $directory = substr($directory, 0, strlen($directory) - 1);
-	$code .= $this->php_file_tree_dir($directory, $return_link, $extensions);
+	$code .= $this->php_file_tree_dir($directory, $return_link, $extensions, $version);
 	return $code;
 }
 
-function php_file_tree_dir($directory, $return_link, $extensions = array(), $first_call = true) {
+function php_file_tree_dir($directory, $return_link, $extensions = array(), $version = "", $first_call = true) {
 	// Recursive function called by php_file_tree() to list directories/files
 	
 	// Get and sort directories/files
@@ -79,15 +83,33 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $fir
 			if( $this_file != "." && $this_file != ".." ) {
 				if( is_dir("$directory/$this_file") ) {
 					// Directory
-					$php_file_tree .= "<li class=\"pft-directory\"><a href=\"#\">" . htmlspecialchars($this_file) . "</a>";
-					$php_file_tree .= $this->php_file_tree_dir("$directory/$this_file", $return_link ,$extensions, false);
+					$php_file_tree .= "<li class=\"pft-directory\"><a href=\"";
+					if( $version === "pico" ) {
+						if( file_exists( "$directory/$this_file"."/index.md" ) ) {
+							$php_file_tree .= preg_replace("/\.\/content\//", "./", "$directory/$this_file");
+						}
+					} else {
+						$php_file_tree .= "#";
+					}
+					$php_file_tree .= "\">" . htmlspecialchars($this_file) . "</a>";
+					$php_file_tree .= $this->php_file_tree_dir("$directory/$this_file", $return_link ,$extensions, $version, false);
 					$php_file_tree .= "</li>";
 				} else {
 					// File
 					// Get extension (prepend 'ext-' to prevent invalid classes from extensions that begin with numbers)
 					$ext = "ext-" . substr($this_file, strrpos($this_file, ".") + 1); 
 					$link = str_replace("[link]", "$directory/" . urlencode($this_file), $return_link);
-					$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
+					if( $version !== "pico" ) {
+						$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
+					} else {
+						if( $this_file !== "index.md" ) {
+							$link = str_replace("[link]", "$directory/" . urlencode($this_file), $return_link);
+							$link = preg_replace("/\.\/content\//", "./", $link);
+							$link = preg_replace("/\.md$/", "", $link);
+							$this_file = preg_replace("/\.md$/", "", $this_file);
+							$php_file_tree .= "<li class=\"pft-file " . strtolower($ext) . "\"><a href=\"$link\">" . htmlspecialchars($this_file) . "</a></li>";
+						}
+					}
 				}
 			}
 		}
