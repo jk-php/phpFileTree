@@ -12,7 +12,7 @@
 		
 	== DOCUMENTATION ==
 	
-		For documentation and updates, visit http://abeautifulsite.net/notebook.php?article=21
+		For documentation and updates, visit http://www.abeautifulsite.net/blog/2007/06/php-file-tree/
 		
 */
 
