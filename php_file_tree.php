@@ -81,7 +81,7 @@ function php_file_tree_dir($directory, $return_link, $extensions = array(), $ver
 		$php_file_tree .= ">";
 		foreach( $file as $this_file ) {
 			if( 1 === preg_match( "/content\/index.md/", "$directory/$this_file" ) ) {
-				$php_file_tree .= "<li class=\"pft-file indexmd\"><a href=\"/\">Home</a></li>";
+				$php_file_tree .= "<li class=\"pft-file ext-md\"><a href=\"/\">Home</a></li>";
 			}
 			if( $this_file != "." && $this_file != ".." && ( $version === "pico" && $this_file !== "index.md" ) && ( $version === "pico" && $this_file !== "404.md" ) ) {
 				if( is_dir("$directory/$this_file") ) {
